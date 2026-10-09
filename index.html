@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthOS — Your personal health, organized.</title>
+  <meta name="description" content="A private personal health organizer for health history, medications, supplements, vitals, reports and trends.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<section id="landing" class="screen">
+  <nav class="topbar">
+    <div class="brand"><span class="brand-mark">H</span> HealthOS</div>
+    <button class="btn btn-primary" data-action="open-auth">Get started</button>
+  </nav>
+  <main class="hero">
+    <div class="eyebrow">YOUR PERSONAL HEALTH, ORGANIZED.</div>
+    <h1>All your health information.<br><span>One calm place.</span></h1>
+    <p>Keep your health history, medications, supplements, vitals and reports together — so you can find what matters when you need it.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-large" data-action="open-auth">Create your HealthOS</button>
+      <button class="btn btn-ghost btn-large" data-action="open-auth">I already have an account</button>
+    </div>
+    <div class="trust-row"><span>🔒 Private by account</span><span>☁️ Your records stay yours</span><span>📱 Mobile friendly</span></div>
+  </main>
+</section>
+
+<section id="auth" class="screen hidden">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <button class="back-link" data-action="show-landing">← Back</button>
+      <div class="brand auth-brand"><span class="brand-mark">H</span> HealthOS</div>
+      <h2>Welcome to HealthOS</h2>
+      <p class="muted">Sign in or create your private health account.</p>
+
+      <button id="googleBtn" class="social-btn" data-action="google">
+        <span class="google-icon">G</span> Continue with Google
+      </button>
+      <div class="divider"><span>or use your mobile number</span></div>
+
+      <label>Mobile number</label>
+      <div class="phone-row">
+        <select id="countryCode" aria-label="Country code">
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+65">🇸🇬 +65</option>
+          <option value="+971">🇦🇪 +971</option>
+        </select>
+        <input id="phone" inputmode="tel" placeholder="9876543210" maxlength="15">
+      </div>
+      <button id="sendOtpBtn" class="btn btn-primary full" data-action="send-otp">Send OTP</button>
+
+      <div id="otpBox" class="otp-box hidden">
+        <label>Enter the 6-digit OTP</label>
+        <input id="otp" inputmode="numeric" maxlength="6" placeholder="123456">
+        <button class="btn btn-primary full" data-action="verify-otp">Verify & continue</button>
+        <button class="text-btn" data-action="resend-otp">Resend OTP</button>
+      </div>
+
+      <p class="tiny">By continuing, you agree to use HealthOS responsibly. This app is an organizer, not a diagnostic or emergency service.</p>
+    </div>
+  </div>
+</section>
+
+<section id="onboarding" class="screen hidden">
+  <div class="onboard-wrap">
+    <div class="onboard-header">
+      <div class="brand"><span class="brand-mark">H</span> HealthOS</div>
+      <div class="step-label">Profile setup <span id="stepLabel">1 of 3</span></div>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div class="onboard-card">
+      <div id="onboardStep1" class="onboard-step">
+        <div class="eyebrow">LET'S START</div>
+        <h2>Tell us about you</h2>
+        <p class="muted">Only enter information you're comfortable storing in your account.</p>
+        <div class="grid-2">
+          <div><label>Full name</label><input id="p_name" placeholder="Your name"></div>
+          <div><label>Date of birth</label><input id="p_dob" type="date"></div>
+          <div><label>Sex</label><select id="p_sex"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Intersex</option><option>Other</option></select></div>
+          <div><label>Blood group <span class="optional">optional</span></label><select id="p_blood"><option value="">Not set</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div><label>Height (cm)</label><input id="p_height" inputmode="decimal" placeholder="e.g. 165"></div>
+          <div><label>Weight (kg)</label><input id="p_weight" inputmode="decimal" placeholder="e.g. 60"></div>
+        </div>
+        <button class="btn btn-primary next-btn" data-action="onboard-next">Continue →</button>
+      </div>
+
+      <div id="onboardStep2" class="onboard-step hidden">
+        <div class="eyebrow">HEALTH HISTORY</div>
+        <h2>Your health background</h2>
+        <p class="muted">These fields are optional. You can update them later.</p>
+        <label>Existing conditions</label><textarea id="p_conditions" placeholder="Example: asthma, migraine, none..."></textarea>
+        <label>Allergies</label><textarea id="p_allergies" placeholder="Medicines, foods, environmental allergies..."></textarea>
+        <label>Past surgeries / procedures</label><textarea id="p_surgeries" placeholder="Add anything you want to keep on record..."></textarea>
+        <label>Family health history</label><textarea id="p_family" placeholder="Anything relevant you want to remember..."></textarea>
+        <div class="button-row"><button class="btn btn-ghost" data-action="onboard-back">← Back</button><button class="btn btn-primary" data-action="onboard-next">Continue →</button></div>
+      </div>
+
+      <div id="onboardStep3" class="onboard-step hidden">
+        <div class="eyebrow">ALMOST THERE</div>
+        <h2>Your HealthOS is ready.</h2>
+        <div class="privacy-box"><strong>🔒 Privacy first</strong><p>Your records are stored under your signed-in account. HealthOS is designed as a personal organizer and does not replace professional medical care.</p></div>
+        <button class="btn btn-primary full" data-action="finish-onboarding">Open my dashboard</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="app" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">H</span> HealthOS</div>
+    <div class="user-mini"><div id="avatar" class="avatar">H</div><div><strong id="sideName">You</strong><span id="sidePhone">Account</span></div></div>
+    <nav>
+      <button class="nav-item active" data-nav="home">⌂ <span>Home</span></button>
+      <button class="nav-item" data-nav="reports">▣ <span>Reports</span></button>
+      <button class="nav-item" data-nav="medications">✚ <span>Medications</span></button>
+      <button class="nav-item" data-nav="supplements">◌ <span>Supplements</span></button>
+      <button class="nav-item" data-nav="vitals">⌁ <span>Vitals</span></button>
+      <button class="nav-item" data-nav="trends">↗ <span>Trends</span></button>
+      <button class="nav-item" data-nav="timeline">◷ <span>Timeline</span></button>
+      <button class="nav-item" data-nav="ask">✦ <span>Ask Health</span></button>
+    </nav>
+    <div class="sidebar-bottom"><button class="nav-item" data-nav="profile">⚙ <span>Profile & privacy</span></button><button class="nav-item" data-action="logout">↪ <span>Log out</span></button></div>
+  </aside>
+
+  <main class="main">
+    <header class="mobile-header"><div class="brand"><span class="brand-mark">H</span> HealthOS</div><button id="mobileMenu" class="icon-btn">☰</button></header>
+    <div id="page"></div>
+  </main>
+</section>
+
+<div id="modal" class="modal hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
