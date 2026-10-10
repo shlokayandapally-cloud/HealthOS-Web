@@ -5,4 +5,4 @@
 window.HEALTHOS_CONFIG = {
   SUPABASE_URL: "https://bcgoknxyepbpbucpjhbc.supabase.co",
   SUPABASE_KEY: "sb_publishable_pbf0bcZLtNJnYUyiFGukhQ_5K3n5rmF"
-};‹
+};
