@@ -57,6 +57,7 @@ function handleClick(e){
   if(action==="delete-supp")deleteSupplement(a.dataset.id);
   if(action==="delete-vital")deleteVital(a.dataset.id);
   if(action==="delete-report")deleteReport(a.dataset.id);
+  if(action==="run-demo-analysis")runDemoAnalysis();
 }
 async function googleLogin(){
   if(!requireConfig())return;
@@ -190,10 +191,54 @@ function renderTimeline(){
   return pageHead("Timeline","A chronological view of your health records.")+
   `<div class="card">${items.map(i=>`<div class="list-item"><div><strong>${escapeHtml(i.title)}</strong><div class="sub">${escapeHtml(i.sub)}</div></div><span class="sub">${fmtDate(i.date)}</span></div>`).join("")||`<div class="empty">Your timeline will appear as you add records.</div>`}</div>`;
 }
+
 function renderAsk(){
-  return pageHead("Ask Health","Search your own records using plain language.")+
-  `<div class="card"><h3>Ask your records</h3><p class="muted">This first version searches your saved records. It does not diagnose, predict conditions, or replace a clinician.</p>
-  <div class="toolbar"><input id="askInput" placeholder="Try: show my recent reports"></div><button class="btn btn-primary" data-action="ask-search">Search records</button><div id="askResults" style="margin-top:18px"></div></div>`;
+  return pageHead(
+    "Health Analysis",
+    "Try report summaries, medicine organisation, and measurement trends."
+  ) +
+  `<div class="card">
+    <h3>Analysis workspace</h3>
+    <p class="muted">
+      Use fictional data only. This prototype compares supplied values
+      and organises information; it does not diagnose.
+    </p>
+
+    <label for="analysisTask">Choose a feature</label>
+    <select id="analysisTask">
+      <option value="report">Lab report summary</option>
+      <option value="medicines">Medicine organiser</option>
+      <option value="trends">Health trends</option>
+    </select>
+
+    <label for="analysisPayload">Sample data (JSON)</label>
+    <textarea id="analysisPayload" rows="12">{
+  "tests": [
+    {
+      "name": "Fictional Marker A",
+      "value": 12,
+      "unit": "units",
+      "low": 5,
+      "high": 10
+    },
+    {
+      "name": "Fictional Marker B",
+      "value": 7,
+      "unit": "units",
+      "low": 5,
+      "high": 10
+    }
+  ]
+}</textarea>
+
+    <button class="btn btn-primary" data-action="run-demo-analysis">
+      Analyse sample
+    </button>
+
+    <div id="analysisStatus" role="status" style="margin-top:16px"></div>
+    <pre id="analysisResults"
+      style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  </div>`;
 }
 function renderProfile(){
   return pageHead("Profile & privacy","Review the personal information stored in your HealthOS account.","Edit profile","edit-profile")+
@@ -257,4 +302,50 @@ function openProfileModal(){openModal("Edit profile",`<div class="form-grid"><di
 async function saveProfile(){const data={id:currentUser.id,full_name:$("e_name").value.trim(),dob:$("e_dob").value||null,blood_group:$("e_blood").value.trim()||null,height_cm:parseFloat($("e_height").value)||null,weight_kg:parseFloat($("e_weight").value)||null,conditions:$("e_conditions").value.trim()||null,allergies:$("e_allergies").value.trim()||null,surgeries:$("e_surgeries").value.trim()||null,family_history:$("e_family").value.trim()||null,updated_at:new Date().toISOString()};const {error}=await sb.from("profiles").upsert(data);if(error)toast(error.message);else{profile={...profile,...data};closeModal();renderApp();toast("Profile updated.")}}
 async function logout(){if(sb)await sb.auth.signOut();setScreen("landing")}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-nav]");if(n)navigate(n.dataset.nav);if(e.target.closest('[data-action="ask-search"]')){const q=($("askInput")?.value||"").toLowerCase();const results=[...reportCache.map(x=>({date:x.report_date,title:x.title,type:"Report"})),...vitalCache.map(x=>({date:x.recorded_at,title:`${x.type}: ${x.value} ${x.unit||""}`,type:"Vital"})),...medicationCache.map(x=>({date:x.created_at,title:x.name,type:"Medication"}))].filter(x=>(x.title+" "+x.type).toLowerCase().includes(q||"")).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,20);$("askResults").innerHTML=results.map(x=>`<div class="list-item"><div><strong>${escapeHtml(x.title)}</strong><div class="sub">${escapeHtml(x.type)}</div></div><span class="sub">${fmtDate(x.date)}</span></div>`).join("")||`<div class="empty">No matching records found.</div>`}})
+
+async function runDemoAnalysis(){
+  const task = $("analysisTask")?.value;
+  const status = $("analysisStatus");
+  const output = $("analysisResults");
+  const input = $("analysisPayload")?.value;
+
+  if (!status || !output || !input) return;
+
+  status.textContent = "Analysing sample...";
+  output.textContent = "";
+
+  let sample;
+
+  try {
+    sample = JSON.parse(input);
+  } catch {
+    status.textContent = "Please check your JSON. It has a formatting error.";
+    return;
+  }
+
+  if (!["report", "medicines", "trends"].includes(task)) {
+    status.textContent = "Please choose a valid feature.";
+    return;
+  }
+
+  const { data, error } = await sb.functions.invoke(
+    "health-analysis",
+    {
+      body: {
+        task,
+        ...sample
+      }
+    }
+  );
+
+  if (error) {
+    console.error("HealthOS analysis error:", error.message);
+    status.textContent =
+      "Analysis failed. Check that you're signed in and the function is deployed.";
+    return;
+  }
+
+  status.textContent = "Analysis complete.";
+  output.textContent = JSON.stringify(data, null, 2);
+}
 init();
